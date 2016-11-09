@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import glob
 from astropy.table import Table
 
-def ptfideLightCurve(ideFile, hjd0, SNT = 3, SNU = 5, plotLC = False):
+def ptfide_light_curve(ideFile, hjd0, SNT = 3, SNU = 5, plotLC = False):
     """
     Produce calibrated mag measurements from PTFIDE forced photometry
     
