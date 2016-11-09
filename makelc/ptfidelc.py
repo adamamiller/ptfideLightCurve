@@ -68,12 +68,8 @@ def ptfide_light_curve(ideFile, hjd0, SNT = 3, SNU = 5, plotLC = False):
     # determine baseline flux prior to transient
     baseline = np.median(lcDat['flux'][early])
 
-    # rescale the flux uncertainties to be conservative
-    chi = np.median(lcDat['chi'][early])
-
-    print("chi = {}".format(chi))
-
     # first step - rescale by the Chi values as suggested by Frank
+    chi = np.median(lcDat['chi'][early])
     if chi > 1:
         sigflux = lcDat['sigflux']*chi
     else:
@@ -81,7 +77,6 @@ def ptfide_light_curve(ideFile, hjd0, SNT = 3, SNU = 5, plotLC = False):
 
     # second step - check if scatter in flux measurements is similar to mean uncertainty
     s = np.std(lcDat['flux'][early], ddof = 1)/np.median(sigflux[early])
-    print("s = {:.4f}".format(s))
     if s > 1:
         sigflux = s * sigflux
     
