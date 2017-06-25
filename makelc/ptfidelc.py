@@ -43,19 +43,27 @@ def ptfide_light_curve(ideFile, hjd0, SNT = 3, SNU = 5, plotLC = False):
         mag uncertainty on epochs when the source is detected.
 
     hjdLim : array
-        Heliocentric Julian Date on epochs when the source is not detected.
+        Heliocentric Julian Date on epochs when the source is not 
+        detected.
 
     magLim : array
         Upper limits on epochs when the source is not detected.
     
     hjdFlux : array-like
-        Heliocentric Julian Date on all epochs with reliable subtractions.
+        Heliocentric Julian Date on epochs with reliable 
+        subtractions.
     
     flux : array-like
-        flux on all epochs with reliable subtractions.
+        flux on all epochs with reliable subtractions under 
+        assumption that the photometry is calibrated to the AB system. This 
+        assumption is not correct, nevertheless it is useful to 
+        propagate uncertainties associated with ZP
         
     fluxUnc : array
-        flux uncertainty on all epochs with reliable subtractions.
+        flux uncertainty on epochs with reliable subtractions under 
+        assumption that the photometry is calibrated to the AB system. This 
+        assumption is not correct, nevertheless it is useful to 
+        propagate uncertainties associated with ZP
     """
 
     lcDat = Table.read(ideFile, format="ipac")
@@ -80,20 +88,29 @@ def ptfide_light_curve(ideFile, hjd0, SNT = 3, SNU = 5, plotLC = False):
     if s > 1:
         sigflux = s * sigflux
     
-    snr = (lcDat['flux']+baseline)/sigflux
+    f_minus_b = lcDat['flux'] - baseline
+    snr = (f_minus_b)/sigflux
     det = np.where((snr >= SNT) & goodSubs)
     lims = np.where((snr < SNT) & goodSubs)
 
+    # calculate output terms
     hjdDet = lcDat['HJD'][det]
-    magDet = lcDat['zpmag'][det] - 2.5*np.log10(lcDat['flux'][det]+baseline)
-    magUncDet = 1.0857*sigflux[det]/(lcDat['flux'][det]+baseline)
+    magDet = lcDat['zpmag'][det] - 2.5*np.log10(f_minus_b[det])
+    magUncDet = np.hypot(lcDat['zprms'][det],
+                         1.0857*sigflux[det]/(f_minus_b[det]))
 
     hjdLim = lcDat['HJD'][lims]
     magLim = lcDat['zpmag'][lims] - 2.5*np.log10(SNU * sigflux[lims])
 
+    # fluxes are in psuedo Jy
     hjdFlux = lcDat['HJD'][goodSubs]
-    flux = lcDat['flux'][goodSubs]+baseline
-    fluxUnc = sigflux[goodSubs]
+    flux = 3631 * f_minus_b[goodSubs] * 10**(-lcDat['zpmag'][goodSubs]/2.5)
+    fluxUnc = np.abs(flux) * \
+              np.hypot( np.divide(sigflux[goodSubs], 
+              f_minus_b[goodSubs], 
+              where=f_minus_b[goodSubs] != 0, 
+              out = sigflux[goodSubs]/lcDat['flux'][goodSubs]),
+              np.log(10)/2.5*lcDat['zprms'][goodSubs] )
     
     if plotLC and len(magDet) > 0:
         plt.errorbar( hjdDet, magDet, magUncDet, fmt = 'o')
