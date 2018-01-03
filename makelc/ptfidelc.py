@@ -6,7 +6,7 @@ import glob
 from astropy.table import Table
 
 
-class ide_lc(self):
+class ide_lc():
     """
     Object to store light curve and associated properties
     """
@@ -46,7 +46,7 @@ class ide_lc(self):
             Scatter (uncertainty) in the ZP mag
         """
 
-        lcDat = Table.read(self.ide_file, format="ipac")
+        lcDat = Table.read(ide_file, format="ipac")
         self.hjd_ = lcDat['HJD']
         self.flux_ = lcDat["flux"]
         self.flux_unc_ = lcDat["sigflux"]
@@ -78,8 +78,8 @@ class ide_lc(self):
         """
         with open(ide_file) as f:
             ll = f.readlines()
-            ref_flux = ll[-2].split(" DN")[0].split(" ")[1]
-            ref_flux_unc = ll[-2].split(" DN")[1].split(" ")[1]
+            ref_flux = ll[-2].split(" DN")[0].split(" ")[-1]
+            ref_flux_unc = ll[-2].split(" DN")[1].split(" ")[-1]
         self.ref_flux_ = float(ref_flux)
         self.ref_flux_unc_ = float(ref_flux_unc)
         
