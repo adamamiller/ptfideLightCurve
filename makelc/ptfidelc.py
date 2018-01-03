@@ -12,7 +12,78 @@ class ide_lc(self):
     """
     def __init__(self, name):
         self.name = name
+    
+    def read_raw_ide(self, ide_file):
+        """
+        Read in the data from the PTFIDE output
+        
+        Parameters
+        ----------
+        ide_file : str, filename
+            Full path to file containing output from PTFIDE forced photometry.
+            Typically has a name like forcepsffitdiff_dFFFFFF_fB_cC.out, where
+            FFFFFF is the field id, B is the filter (1 = g, 2 = R), and C is 
+            the ccd id.
+        
+        Attributes
+        ----------
+        hjd_ : array-like
+            Heliocentric Julian Day for epochs of target observations
+        
+        flux_ : array-like
+            PSF flux measurements at target position corresponding to hjd
+        
+        flux_unc_ : array-like
+            Flux uncertainty measurements
+        
+        chi_ : array-like
+            Chi^2 measurement of the PSF fit to the source
+        
+        zpmag_ : array-like
+            ZP magnitude for every epoch
+        
+        zprms_ : array-like
+            Scatter (uncertainty) in the ZP mag
+        """
 
+        lcDat = Table.read(self.ide_file, format="ipac")
+        self.hjd_ = lcDat['HJD']
+        self.flux_ = lcDat["flux"]
+        self.flux_unc_ = lcDat["sigflux"]
+        self.chi_ = lcDat["chi"]
+        self.zpmag_ = lcDat["zpmag"]
+        self.zprms_ = lcDat["zprms"]
+    
+    def read_ref_flux(self, ide_file):
+        """
+        Read the flux present in the reference image, which is needed for 
+        stellar light curves
+        
+        Parameters
+        ----------
+        ide_file : str, filename
+            Full path to file containing output from PTFIDE forced photometry.
+            Typically has a name like forcepsffitdiff_dFFFFFF_fB_cC.out, where
+            FFFFFF is the field id, B is the filter (1 = g, 2 = R), and C is 
+            the ccd id.
+        
+        Attributes
+        ----------
+        ref_flux_ : float
+            Flux (in DN) of the source in the reference image
+        
+        ref_flux_unc_ : float
+            Flux uncertainty of the source in the reference image
+        
+        """
+        with open(ide_file) as f:
+            ll = f.readlines()
+            ref_flux = ll[-2].split(" DN")[0].split(" ")[1]
+            ref_flux_unc = ll[-2].split(" DN")[1].split(" ")[1]
+        self.ref_flux_ = float(ref_flux)
+        self.ref_flux_unc_ = float(ref_flux_unc)
+        
+        
 def ptfide_light_curve(ideFile, hjd0, SNT = 3, SNU = 5, plotLC = False):
     """
     Produce calibrated mag measurements from PTFIDE forced photometry
