@@ -14,7 +14,8 @@ def ptfide_light_curve(ideFile, hjd0, SNT = 3, SNU = 5, plotLC = False):
     ideFile : str, filename
         Full path to file containing output from PTFIDE forced photometry.
         Typically has a name like forcepsffitdiff_dFFFFFF_fB_cC.out, where
-        FFFFFF is the 
+        FFFFFF is the field id, B is the filter (1 = g, 2 = R), and C is 
+        the ccd id.
     
     hjd0 : float
         The earliest date corresponding to a possible detection of the 
