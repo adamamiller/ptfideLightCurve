@@ -117,11 +117,11 @@ class ide_lc():
         lc_snr = lc_flux/lc_flux_unc
         det = np.logical_and(lc_snr >= SNT, 
                              self.flux_ < 9e7)
-        self.lc_hjd_det_ = self.hjd[det]
-        self.lc_mag_ = self.zpmag[det] - 2.5*np.log10(lc_flux[det])
-        self.lc_mag_unc_ = np.hypot(self.zprms[det], 2.5/np.log(10)*lc_snr[det])
-        self.lc_hjd_lim_ = self.hjd[~det]
-        self.lc_lim_ = self.zpmag[~det] - 2.5*np.log10(SNU*lc_flux_unc[~det])
+        self.lc_hjd_det_ = self.hjd_[det]
+        self.lc_mag_ = self.zpmag_[det] - 2.5*np.log10(lc_flux[det])
+        self.lc_mag_unc_ = np.hypot(self.zprms_[det], 2.5/np.log(10)*lc_snr[det])
+        self.lc_hjd_lim_ = self.hjd_[~det]
+        self.lc_lim_ = self.zpmag_[~det] - 2.5*np.log10(SNU*lc_flux_unc[~det])
         
 def ptfide_light_curve(ideFile, hjd0, SNT = 3, SNU = 5, plotLC = False):
     """
