@@ -113,15 +113,21 @@ class ide_lc():
             upper limits for epochs when the source is not detected
         """
         lc_flux = self.flux_ + self.ref_flux_
-        lc_flux_unc = np.sqrt(self.flux_unc_**2 - self.ref_flux_unc_**2)
+        big_ref_unc = np.logical_not(self.ref_flux_unc_ < self.flux_unc_)
+        lc_flux_unc = np.full_like(self.flux_unc_, np.nan)
+        lc_flux_unc[~big_ref_unc] = np.sqrt(self.flux_unc_[~big_ref_unc]**2 - 
+                                            self.ref_flux_unc_**2)
+        lc_flux_unc[big_ref_unc] = np.hypot(self.flux_unc_[big_ref_unc]**2, 
+                                            self.ref_flux_unc_**2)
         lc_snr = lc_flux/lc_flux_unc
         det = np.logical_and(lc_snr >= SNT, 
                              self.flux_ < 9e7)
+        lim = np.logical_and(lc_snr < SNT, self.flux_ < 9e7)
         self.lc_hjd_det_ = self.hjd_[det]
         self.lc_mag_ = self.zpmag_[det] - 2.5*np.log10(lc_flux[det])
-        self.lc_mag_unc_ = np.hypot(self.zprms_[det], 2.5/np.log(10)*lc_snr[det])
-        self.lc_hjd_lim_ = self.hjd_[~det]
-        self.lc_lim_ = self.zpmag_[~det] - 2.5*np.log10(SNU*lc_flux_unc[~det])
+        self.lc_mag_unc_ = np.hypot(self.zprms_[det], 2.5/np.log(10)/lc_snr[det])
+        self.lc_hjd_lim_ = self.hjd_[lim]
+        self.lc_lim_ = self.zpmag_[lim] - 2.5*np.log10(SNU*lc_flux_unc[lim])
         
 def ptfide_light_curve(ideFile, hjd0, SNT = 3, SNU = 5, plotLC = False):
     """
