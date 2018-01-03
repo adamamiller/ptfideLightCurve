@@ -82,7 +82,29 @@ class ide_lc():
             ref_flux_unc = ll[-2].split(" DN")[1].split(" ")[-1]
         self.ref_flux_ = float(ref_flux)
         self.ref_flux_unc_ = float(ref_flux_unc)
+    
+    def stellar_lc(self, SNT=3, ):
+        """
+        Generate the PTFIDE light curve assuming the source is a star
         
+        Parameters
+        ----------
+        SNT : float (default = 3)
+            Signal-to-noise threshold for determining if a source is detected
+        
+        SNU : float (default = 5)
+            Signal-to-noise threshold for calculating upper limits
+        """
+        lc_flux = self.flux_ + self.ref_flux_
+        lc_flux_unc = np.sqrt(self.flux_unc_**2 - self.ref_flux_unc_**2)
+        lc_snr = lc_flux/lc_flux_unc
+        det = np.logical_and(lc_snr >= SNT, 
+                             self.flux_ < 9e7)
+        self.lc_hjd_det_ = self.hjd[det]
+        self.lc_mag_ = self.zpmag[det] - 2.5*np.log10(lc_flux[det])
+        self.lc_mag_unc_ = np.hypot(self.zprms[det], 2.5/np.log(10)*lc_snr[det])
+        self.lc_hjd_lim_ = self.hjd[~det]
+        self.lc_lim_ = self.zpmag[~det] - 2.5*np.log10(SNU*lc_flux_unc[~det])
         
 def ptfide_light_curve(ideFile, hjd0, SNT = 3, SNU = 5, plotLC = False):
     """
