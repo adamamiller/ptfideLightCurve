@@ -83,7 +83,7 @@ class ide_lc():
         self.ref_flux_ = float(ref_flux)
         self.ref_flux_unc_ = float(ref_flux_unc)
     
-    def stellar_lc(self, SNT=3, ):
+    def stellar_lc(self, SNT=3, SNU=5):
         """
         Generate the PTFIDE light curve assuming the source is a star
         
@@ -94,6 +94,23 @@ class ide_lc():
         
         SNU : float (default = 5)
             Signal-to-noise threshold for calculating upper limits
+        
+        Attributes
+        ----------
+        lc_hjd_det_ : array-like
+            HJD for epochs when the source is detected
+        
+        lc_mag_ : array-like
+            mag for epochs when the source is detected
+
+        lc_mag_unc_ : array-like
+            mag uncertainty for epochs when the source is detected
+        
+        lc_hjd_lim_ : array-like
+            HJD for epochs when the source is not detected
+        
+        lc_lim_ : array-like
+            upper limits for epochs when the source is not detected
         """
         lc_flux = self.flux_ + self.ref_flux_
         lc_flux_unc = np.sqrt(self.flux_unc_**2 - self.ref_flux_unc_**2)
