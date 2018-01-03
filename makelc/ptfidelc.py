@@ -5,6 +5,14 @@ import matplotlib.pyplot as plt
 import glob
 from astropy.table import Table
 
+
+class ide_lc(self):
+    """
+    Object to store light curve and associated properties
+    """
+    def __init__(self, name):
+        self.name = name
+
 def ptfide_light_curve(ideFile, hjd0, SNT = 3, SNU = 5, plotLC = False):
     """
     Produce calibrated mag measurements from PTFIDE forced photometry
